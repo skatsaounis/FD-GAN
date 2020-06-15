@@ -97,11 +97,11 @@ def main(args):
     embed_model = EltwiseSubEmbed(use_batch_norm=True, use_classifier=True,
                                       num_features=2048, num_classes=2)
     model = SiameseNet(base_model, embed_model)
-    model = nn.DataParallel(model).cuda()
+    model = nn.DataParallel(model)
 
     # Evaluator
     evaluator = CascadeEvaluator(
-        torch.nn.DataParallel(base_model).cuda(),
+        torch.nn.DataParallel(base_model),
         embed_model,
         embed_dist_fn=lambda x: F.softmax(Variable(x), dim=1).data[:, 0])
 
@@ -121,7 +121,7 @@ def main(args):
         return
 
     # Criterion
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = nn.CrossEntropyLoss()
     # Optimizer
     param_groups = [
         {'params': model.module.base_model.parameters(), 'lr_mult': 1.0},

@@ -54,7 +54,7 @@ def main():
     visualizer = Visualizer(opt)
 
     evaluator = CascadeEvaluator(
-                    torch.nn.DataParallel(model.net_E.module.base_model).cuda(),
+                    torch.nn.DataParallel(model.net_E.module.base_model),
                     model.net_E.module.embed_model,
                     embed_dist_fn=lambda x: F.softmax(Variable(x), dim=1).data[:, 0])
     if opt.stage!=1:

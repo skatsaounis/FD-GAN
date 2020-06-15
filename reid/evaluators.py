@@ -23,12 +23,13 @@ def extract_embeddings(model, features, alpha, query=None, topk_gallery=None, re
     data_time = AverageMeter()
 
     end = time.time()
-    pairwise_score = Variable(torch.zeros(len(query), rerank_topk, 2).cuda())
+    pairwise_score = Variable(torch.zeros(len(query), rerank_topk, 2))
     probe_feature = torch.cat([features[f].unsqueeze(0) for f, _, _ in query], 0)
     for i in range(len(query)):
         gallery_feature = torch.cat([features[f].unsqueeze(0) for f, _, _ in topk_gallery[i]], 0)
-        pairwise_score[i, :, :] = model(Variable(probe_feature[i].view(1, -1).cuda(), volatile=True),
-                                        Variable(gallery_feature.cuda(), volatile=True))
+        with torch.no_grad():
+            pairwise_score[i, :, :] = model(Variable(probe_feature[i].view(1, -1)),
+                                            Variable(gallery_feature))
         batch_time.update(time.time() - end)
         end = time.time()
 

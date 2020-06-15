@@ -4,12 +4,14 @@ from collections import OrderedDict
 from torch.autograd import Variable
 
 from ..utils import to_torch
+import torch
 
 
 def extract_cnn_feature(model, inputs, modules=None):
     model.eval()
     inputs = to_torch(inputs)
-    inputs = Variable(inputs, volatile=True).cuda()
+    with torch.no_grad():
+        inputs = Variable(inputs)
     if modules is None:
         outputs = model(inputs)
         outputs = outputs.data.cpu()

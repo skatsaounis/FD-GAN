@@ -64,10 +64,10 @@ class FDGANModel(object):
         else:
             assert('unknown training stage')
 
-        self.net_E = torch.nn.DataParallel(self.net_E).cuda()
-        self.net_G = torch.nn.DataParallel(self.net_G).cuda()
-        self.net_Di = torch.nn.DataParallel(self.net_Di).cuda()
-        self.net_Dp = torch.nn.DataParallel(self.net_Dp).cuda()
+        self.net_E = torch.nn.DataParallel(self.net_E)
+        self.net_G = torch.nn.DataParallel(self.net_G)
+        self.net_Di = torch.nn.DataParallel(self.net_Di)
+        self.net_Dp = torch.nn.DataParallel(self.net_Dp)
 
     def reset_model_status(self):
         if self.opt.stage==1:
@@ -90,12 +90,12 @@ class FDGANModel(object):
 
     def _init_losses(self):
         if self.opt.smooth_label:
-            self.criterionGAN_D = GANLoss(smooth=True).cuda()
+            self.criterionGAN_D = GANLoss(smooth=True)
             self.rand_list = [True] * 1 + [False] * 10000
         else:
-            self.criterionGAN_D = GANLoss(smooth=False).cuda()
+            self.criterionGAN_D = GANLoss(smooth=False)
             self.rand_list = [False]
-        self.criterionGAN_G = GANLoss(smooth=False).cuda()
+        self.criterionGAN_G = GANLoss(smooth=False)
 
     def _init_optimizers(self):
         if self.opt.stage==1:
@@ -140,11 +140,11 @@ class FDGANModel(object):
         posemap = torch.cat([input1['posemap'], input2['posemap']])
         noise = torch.cat((noise, noise))
 
-        self.origin = origin.cuda()
-        self.target = target.cuda()
-        self.posemap = posemap.cuda()
-        self.labels = labels.cuda()
-        self.noise = noise.cuda()
+        self.origin = origin
+        self.target = target
+        self.posemap = posemap
+        self.labels = labels
+        self.noise = noise
 
     def forward(self):
         A = Variable(self.origin)

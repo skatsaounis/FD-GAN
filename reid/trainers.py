@@ -31,7 +31,7 @@ class BaseTrainer(object):
             inputs, targets = self._parse_data(inputs)
             loss, prec1 = self._forward(inputs, targets)
 
-            losses.update(loss.data[0], targets.size(0))
+            losses.update(loss.data, targets.size(0))
             precisions.update(prec1, targets.size(0))
 
             optimizer.zero_grad()
@@ -63,7 +63,7 @@ class SiameseTrainer(BaseTrainer):
     def _parse_data(self, inputs):
         (imgs1, _, pids1, _), (imgs2, _, pids2, _) = inputs
         inputs = [Variable(imgs1), Variable(imgs2)]
-        targets = Variable((pids1 == pids2).long().cuda())
+        targets = Variable((pids1 == pids2).long())
         return inputs, targets
 
     def _forward(self, inputs, targets):
