@@ -53,8 +53,8 @@ class FDGANModel(object):
             init_weights(self.net_Dp)
             state_dict = remove_module_key(torch.load(self.opt.netE_pretrain))
             self.net_E.load_state_dict(state_dict)
-            state_dict['embed_model.classifier.weight'] = state_dict['embed_model.classifier.weight'][1]
-            state_dict['embed_model.classifier.bias'] = torch.FloatTensor([state_dict['embed_model.classifier.bias'][1]])
+            state_dict['embed_model.classifier.weight'] = state_dict['embed_model.classifier.weight'][1].view(1, -1)
+            state_dict['embed_model.classifier.bias'] = torch.FloatTensor([state_dict['embed_model.classifier.bias'][1]]).view(-1)
             self.net_Di.load_state_dict(state_dict)
         elif self.opt.stage==2:
             self._load_state_dict(self.net_E, self.opt.netE_pretrain)
@@ -170,7 +170,7 @@ class FDGANModel(object):
             loss_D_fake = self.criterionGAN_D(pred_fake, False)
         loss_D = (loss_D_real + loss_D_fake) * 0.5
         loss_D.backward()
-        self.loss_Dp = loss_D.data[0]
+        self.loss_Dp = loss_D.item()
 
     def backward_Di(self):
         _, _, pred_real = self.net_Di(Variable(self.origin), Variable(self.target))
@@ -183,7 +183,7 @@ class FDGANModel(object):
             loss_D_fake = self.criterionGAN_D(pred_fake, False)
         loss_D = (loss_D_real + loss_D_fake) * 0.5
         loss_D.backward()
-        self.loss_Di = loss_D.data[0]
+        self.loss_Di = loss_D.item()
 
     def backward_G(self):
         loss_v = F.cross_entropy(self.id_score, Variable(self.labels).view(-1))
@@ -205,12 +205,12 @@ class FDGANModel(object):
         loss_G.backward()
 
         del self.id_score
-        self.loss_G = loss_G.data[0]
-        self.loss_v = loss_v.data[0]
-        self.loss_sp = loss_sp.data[0]
-        self.loss_r = loss_r.data[0]
-        self.loss_G_GAN_Di = loss_G_GAN_Di.data[0]
-        self.loss_G_GAN_Dp = loss_G_GAN_Dp.data[0]
+        self.loss_G = loss_G.item()
+        self.loss_v = loss_v.item()
+        self.loss_sp = loss_sp.item()
+        self.loss_r = loss_r.item()
+        self.loss_G_GAN_Di = loss_G_GAN_Di.item()
+        self.loss_G_GAN_Dp = loss_G_GAN_Dp.item()
         self.fake = self.fake.data
 
     def optimize_parameters(self):
