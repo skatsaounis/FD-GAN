@@ -1,7 +1,11 @@
 from __future__ import absolute_import
 
 from .resnet import *
-
+from .inception import *
+from .inceptionv4 import *
+from .squeezenet import *
+from .mgn import *
+from .hacnn import *
 
 __factory = {
     'resnet18': resnet18,
@@ -9,6 +13,14 @@ __factory = {
     'resnet50': resnet50,
     'resnet101': resnet101,
     'resnet152': resnet152,
+    'inception': inception,
+    'InceptionNet': inception,
+    'inceptionv4': inceptionv4,
+    'squeezenet': squeezenet,
+    'squeezenet1_1': squeezenet1_1,
+    'squeezenet1_0': squeezenet1_0,
+    'mgn': mgn,
+    'hacnn': hacnn
 }
 
 

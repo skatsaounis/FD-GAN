@@ -84,24 +84,36 @@ def main(args):
         sys.stdout = Logger(osp.join(log_dir, 'log_test.txt'))
     # print("==========\nArgs:{}\n==========".format(args))
 
-    # Create data loaders
+    # Create data loaders with specific size of photos
     if args.height is None or args.width is None:
-        args.height, args.width = (256, 128)
+        args.height, args.width = (144, 56) if args.arch in \
+                                               ['inception', 'inceptionNet', 'squeezenet', 'squeezenet1_0', 'squeezenet1_1'] else \
+            (384, 128) if args.arch == 'mgn' else (160, 64) if args.arch == 'hacnn' else\
+                (256, 128)
+
     dataset, train_loader, val_loader, test_loader = \
         get_data(args.dataset, args.split, args.data_dir, args.height,
                  args.width, args.batch_size, args.workers,
                  args.combine_trainval, args.np_ratio)
 
     # Create model
+    args.features = 1024 if args.arch in \
+                            ['squeezenet', 'squeezenet1_0', 'squeezenet1_1'] else \
+        1536 if args.arch in ['mgn', 'inception', 'inceptionv4'] else \
+            2048
+
     base_model = models.create(args.arch, cut_at_pooling=True)
     embed_model = EltwiseSubEmbed(use_batch_norm=True, use_classifier=True,
-                                      num_features=2048, num_classes=2)
+                                      num_features=args.features, num_classes=2)
     model = SiameseNet(base_model, embed_model)
-    model = nn.DataParallel(model).cuda()
+    model = nn.DataParallel(model).cuda() # gpu #
+
+    print(model)
+    print('No of parameters:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
     # Evaluator
     evaluator = CascadeEvaluator(
-        torch.nn.DataParallel(base_model).cuda(),
+        torch.nn.DataParallel(base_model).cuda(), # gpu #
         embed_model,
         embed_dist_fn=lambda x: F.softmax(Variable(x), dim=1).data[:, 0])
 
@@ -121,7 +133,7 @@ def main(args):
         return
 
     # Criterion
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = nn.CrossEntropyLoss().cuda() # gpu #
     # Optimizer
     param_groups = [
         {'params': model.module.base_model.parameters(), 'lr_mult': 1.0},
@@ -178,6 +190,7 @@ if __name__ == '__main__':
     # model
     parser.add_argument('-a', '--arch', type=str, default='resnet50',
                         choices=models.names())
+    parser.add_argument('--features', type=int, default=2048, help="no of features, default: 2048 for resnet*")
     # optimizer
     parser.add_argument('--lr', type=float, default=0.01, help="learning rate")
     parser.add_argument('--np-ratio', type=int, default=3)
