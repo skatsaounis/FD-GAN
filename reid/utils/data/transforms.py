@@ -111,7 +111,7 @@ class RandomColorJitter:
     def __call__(self, img):
         p1 = random.uniform(0, 1)
 
-        if p1 < self.p:
+        if p1 > self.p:
             return img
         else:
             # Draw from uniform to decide which action to take
