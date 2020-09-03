@@ -13,3 +13,12 @@ torch.egg-info/
 */**/*.so*
 */**/*.dylib*
 *~
+
+.idea
+reid/__pycache__
+reid/datasets/__pycache__
+reid/evaluation_metrics/__pycache__
+reid/feature_extraction/__pycache__
+reid/models/__pycache__
+reid/utils/__pycache__
+reid/utils/data/__pycache__

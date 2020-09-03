@@ -26,7 +26,7 @@ from reid.evaluators import CascadeEvaluator
 from reid.trainers import SiameseTrainer
 
 def get_data(name, split_id, data_dir, height, width, batch_size, workers,
-             combine_trainval, np_ratio):
+             combine_trainval, np_ratio, augmented=False):
     root = osp.join(data_dir, name)
 
     dataset = datasets.create(name, root, split_id=split_id)
@@ -36,13 +36,23 @@ def get_data(name, split_id, data_dir, height, width, batch_size, workers,
 
     train_set = dataset.trainval if combine_trainval else dataset.train
 
-    train_transformer = T.Compose([
-        T.RandomSizedRectCrop(height, width),
-        T.RandomSizedEarser(),
-        T.RandomHorizontalFlip(),
-        T.ToTensor(),
-        normalizer,
-    ])
+    if augmented:
+        train_transformer = T.Compose([
+            T.RandomSizedRectCrop(height, width),
+            T.RandomColorJitter(),
+            T.RandomSizedEarser(),
+            T.RandomHorizontalFlip(),
+            T.ToTensor(),
+            normalizer,
+        ])
+    else:
+        train_transformer = T.Compose([
+            T.RandomSizedRectCrop(height, width),
+            T.RandomSizedEarser(),
+            T.RandomHorizontalFlip(),
+            T.ToTensor(),
+            normalizer,
+        ])
 
     test_transformer = T.Compose([
         T.RectScale(height, width),
@@ -210,4 +220,7 @@ if __name__ == '__main__':
                         default=osp.join(working_dir, 'datasets'))
     parser.add_argument('--logs-dir', type=str, metavar='PATH',
                         default=osp.join(working_dir, 'checkpoints'))
+
+    parser.add_argument('-aug', '--augmented', action='store_true', default=False, required=False)
+
     main(parser.parse_args())

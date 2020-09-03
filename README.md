@@ -156,3 +156,6 @@ srun python3 /users/pa19/gealexdl/team8/FD-GAN/baseline.py \
     --eval-step 2 --epochs 20 \
     /users/pa19/gealexdl/team8/FD-GAN/datasets/stg1-market/model_best_mgn.pth.tar
 ```
+
+## Augment Data (random Brightness/Contrast/Saturation)
+pass  ```-aug```
