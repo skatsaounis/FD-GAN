@@ -93,7 +93,8 @@ def main(args):
     else:
         log_dir = osp.dirname(args.resume)
         sys.stdout = Logger(osp.join(log_dir, 'log_test.txt'))
-    # print("==========\nArgs:{}\n==========".format(args))
+
+    print("==========\nArgs:{}\n==========".format(args))
 
     # Create data loaders with specific size of photos
     if args.height is None or args.width is None:
@@ -114,8 +115,8 @@ def main(args):
             2048
 
     base_model = models.create(args.arch, cut_at_pooling=True)
-    embed_model = EltwiseSubEmbed(use_batch_norm=True, use_classifier=True,
-                                      num_features=args.features, num_classes=2)
+    embed_model = EltwiseSubEmbed(use_batch_norm=True, use_classifier=True, num_features=args.features, num_classes=2,
+                                  use_sft=args.spectral)
     model = SiameseNet(base_model, embed_model)
     model = nn.DataParallel(model).cuda() # gpu #
 
@@ -192,8 +193,8 @@ if __name__ == '__main__':
     # data
     parser.add_argument('-d', '--dataset', type=str, default='market1501',
                         choices=datasets.names())
-    parser.add_argument('-b', '--batch-size', type=int, default=256)
-    parser.add_argument('-j', '--workers', type=int, default=4)
+    parser.add_argument('-b', '--batch-size', type=int, default=36)
+    parser.add_argument('-j', '--workers', type=int, default=10)
     parser.add_argument('--split', type=int, default=0)
     parser.add_argument('--height', type=int,
                         help="input height, default: 256 for resnet")
@@ -227,6 +228,7 @@ if __name__ == '__main__':
                         default=osp.join(working_dir, 'checkpoints'))
 
     parser.add_argument('-aug', '--augmented', action='store_true', default=False, required=False)
+    parser.add_argument('-sft', '--spectral', action='store_true', default=False, required=False)
 
     parser.add_argument('--margin', type=float, default=0.5,
                         help="margin of the triplet loss, default: 0.5")
