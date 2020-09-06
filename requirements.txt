@@ -1,0 +1,7 @@
+scipy
+pillow
+torchvision==0.1.9
+sklearn
+h5py
+dominate
+visdom

@@ -18,6 +18,7 @@ from reid.utils.data import transforms as T
 from reid.utils.data.preprocessor import Preprocessor
 from reid.utils.logging import Logger
 from reid.utils.serialization import load_checkpoint, save_checkpoint, copy_state_dict
+from reid.loss import TripletLoss
 
 from reid.utils.data.sampler import RandomPairSampler
 from reid.models.embedding import EltwiseSubEmbed
@@ -143,7 +144,11 @@ def main(args):
         return
 
     # Criterion
-    criterion = nn.CrossEntropyLoss().cuda() # gpu #
+    if args.criterion == 'cross':
+        criterion = nn.CrossEntropyLoss().cuda()
+    elif args.criterion == 'triplet':
+        criterion = TripletLoss(args.margin).cuda()
+
     # Optimizer
     param_groups = [
         {'params': model.module.base_model.parameters(), 'lr_mult': 1.0},
@@ -223,4 +228,8 @@ if __name__ == '__main__':
 
     parser.add_argument('-aug', '--augmented', action='store_true', default=False, required=False)
 
+    parser.add_argument('--margin', type=float, default=0.5,
+                        help="margin of the triplet loss, default: 0.5")
+    parser.add_argument('--criterion', type=str, default='cross',
+                        choices=['cross', 'triplet'])
     main(parser.parse_args())
