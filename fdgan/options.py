@@ -10,7 +10,7 @@ class Options():
     def __init__(self):
         self.parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-        self.parser.add_argument('--stage', type=int, default=1, help='training stage [1|2]')
+        self.parser.add_argument('--stage', type=int, default=2, help='training stage [1|2]')
         self.parser.add_argument('-d', '--dataset', type=str, default='market1501', choices=datasets.names())
         # paths
         self.parser.add_argument('--dataroot', type=str, default='./datasets/', help='root path to datasets (should have subfolders market1501, dukemtmc, cuhk03, etc)')
@@ -52,8 +52,8 @@ class Options():
         # visualization setting
         self.parser.add_argument('--display-port', type=int, default=6006, help='visdom port of the web display')
         #self.parser.add_argument('--display-port', type=int, default=0, help='visdom port of the web display')
-        self.parser.add_argument('--display-id', type=int, default=1, help='window id of the web display, set 0 for non-usage of visdom')
-        #self.parser.add_argument('--display-id', type=int, default=0, help='window id of the web display, set 0 for non-usage of visdom')
+        #self.parser.add_argument('--display-id', type=int, default=1, help='window id of the web display, set 0 for non-usage of visdom')
+        self.parser.add_argument('--display-id', type=int, default=0, help='window id of the web display, set 0 for non-usage of visdom')
         self.parser.add_argument('--display-winsize', type=int, default=256,  help='display window size')
         self.parser.add_argument('--display-freq', type=int, default=10, help='frequency of showing training results on screen')
         self.parser.add_argument('--display-single-pane-ncols', type=int, default=0, help='if positive, display all images in a single visdom web panel with certain number of images per row.')
