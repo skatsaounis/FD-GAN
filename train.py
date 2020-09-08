@@ -18,6 +18,7 @@ from fdgan.options import Options
 from fdgan.utils.visualizer import Visualizer
 from fdgan.model import FDGANModel
 
+
 def get_data(name, data_dir, height, width, batch_size, workers, pose_aug):
     root = osp.join(data_dir, name)
     dataset = datasets.create(name, root)
@@ -42,6 +43,7 @@ def get_data(name, data_dir, height, width, batch_size, workers, pose_aug):
         shuffle=False, pin_memory=False)
 
     return dataset, train_loader, test_loader
+
 
 def main():
     opt = Options().parse()

@@ -9,6 +9,7 @@ from torch.autograd import Variable
 from torch.nn import functional as F
 from torch.nn import init
 
+
 class GANLoss(nn.Module):
     def __init__(self, smooth=False):
         super(GANLoss, self).__init__()
@@ -28,5 +29,5 @@ class GANLoss(nn.Module):
 
     def __call__(self, input, target_is_real):
         target_tensor = self.get_target_tensor(input, target_is_real)
-        input = F.sigmoid(input)
+        input = torch.sigmoid(input)
         return F.binary_cross_entropy(input, target_tensor)
