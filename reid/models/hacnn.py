@@ -6,6 +6,7 @@ from torch.nn import functional as F
 __all__ = ['hacnn']
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 class ConvBlock(nn.Module):
     """Basic convolutional block.
 
@@ -206,12 +207,12 @@ class HACNN(nn.Module):
 
     def __init__(
             self,
-            num_classes = 2048,
+            num_classes=2048,
             loss='softmax',
             nchannels=[128, 256, 384],
             num_features=2048,
             learn_region=True,
-            use_gpu=False,
+            use_gpu=True,
             **kwargs
     ):
         super(HACNN, self).__init__()
@@ -260,7 +261,7 @@ class HACNN(nn.Module):
                 nn.BatchNorm1d(num_features),
                 nn.ReLU(),
             )
-            #self.classifier_local = nn.Linear(num_features, num_classes)
+            # self.classifier_local = nn.Linear(num_features, num_classes)
             self.num_features = num_features * 2
         else:
             self.num_features = num_features
@@ -369,7 +370,7 @@ class HACNN(nn.Module):
         x_global = F.avg_pool2d(x3_out,
                                 x3_out.size()[2:]
                                 ).view(x3_out.size(0), x3_out.size(1))
-        x_global = self.fc_global(x_global)
+        #####x_global = self.fc_global(x_global)
         # local branch
         if self.learn_region:
             x_local_list = []
@@ -391,24 +392,25 @@ class HACNN(nn.Module):
             else:
                 return x_global
 
-        prelogits_global = self.classifier_global(x_global)
-        #if self.learn_region:
+        return torch.cat([x_global, x_local], 1)  # x_global
+        ###prelogits_global = self.classifier_global(x_global)
+        # if self.learn_region:
         #    prelogits_local = self.classifier_local(x_local)
 
-        if self.loss == 'softmax':
-            #if self.learn_region:
-            #    return (prelogits_global, prelogits_local)
-            #else:
-                return prelogits_global
+        ###if self.loss == 'softmax':
+        # if self.learn_region:
+        #    return (prelogits_global, prelogits_local)
+        # else:
+        ###        return prelogits_global
 
-        #elif self.loss == 'triplet':
+        # elif self.loss == 'triplet':
         #    if self.learn_region:
         #        return (prelogits_global, prelogits_local), (x_global, x_local)
         #    else:
         #        return prelogits_global, x_global
 
-        else:
-            raise KeyError("Unsupported loss: {}".format(self.loss))
+        ###else:
+        ###    raise KeyError("Unsupported loss: {}".format(self.loss))
 
 
 def hacnn(**kwargs):

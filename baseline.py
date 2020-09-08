@@ -112,6 +112,7 @@ def main(args):
     args.features = 1024 if args.arch in \
                             ['squeezenet', 'squeezenet1_0', 'squeezenet1_1'] else \
         1536 if args.arch in ['mgn', 'inception', 'inceptionv4'] else \
+        2432 if args.arch == 'hacnn' else \
             2048
 
     base_model = models.create(args.arch, cut_at_pooling=True)
