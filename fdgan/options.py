@@ -39,8 +39,8 @@ class Options():
         self.parser.add_argument('--noise-feature-size', type=int, default=256, help='length of feature vector for noise')
         self.parser.add_argument('--pose-aug', type=str, default='no', help='posemap augmentation [no|erase|gauss]')
         # dataloader setting
-        self.parser.add_argument('-b', '--batch-size', type=int, default=3, help='input batch size')
-        self.parser.add_argument('-j', '--workers', default=4, type=int, help='num threads for loading data')
+        self.parser.add_argument('-b', '--batch-size', type=int, default=4, help='input batch size')
+        self.parser.add_argument('-j', '--workers', default=10, type=int, help='num threads for loading data')
         self.parser.add_argument('--width', type=int, default=128, help='input image width')
         self.parser.add_argument('--height', type=int, default=256, help='input image height')
         # optimizer setting
@@ -50,17 +50,17 @@ class Options():
         self.parser.add_argument('--save-step', type=int, default=5, help='frequency of saving checkpoints at the end of epochs')
         self.parser.add_argument('--eval-step', type=int, default=10, help='frequency of evaluate checkpoints at the end of epochs')
         # visualization setting
-        #self.parser.add_argument('--display-port', type=int, default=6006, help='visdom port of the web display')
-        self.parser.add_argument('--display-port', type=int, default=0, help='visdom port of the web display')
-        #self.parser.add_argument('--display-id', type=int, default=1, help='window id of the web display, set 0 for non-usage of visdom')
-        self.parser.add_argument('--display-id', type=int, default=0, help='window id of the web display, set 0 for non-usage of visdom')
+        self.parser.add_argument('--display-port', type=int, default=6006, help='visdom port of the web display')
+        #self.parser.add_argument('--display-port', type=int, default=0, help='visdom port of the web display')
+        self.parser.add_argument('--display-id', type=int, default=1, help='window id of the web display, set 0 for non-usage of visdom')
+        #self.parser.add_argument('--display-id', type=int, default=0, help='window id of the web display, set 0 for non-usage of visdom')
         self.parser.add_argument('--display-winsize', type=int, default=256,  help='display window size')
         self.parser.add_argument('--display-freq', type=int, default=10, help='frequency of showing training results on screen')
         self.parser.add_argument('--display-single-pane-ncols', type=int, default=0, help='if positive, display all images in a single visdom web panel with certain number of images per row.')
         self.parser.add_argument('--update-html-freq', type=int, default=100, help='frequency of saving training results to html')
-        #self.parser.add_argument('--no_html', action='store_true', help='do not save intermediate training results to [opt.checkpoints]/name/web/')
-        self.parser.add_argument('--no_html', action='store_true', default=False,
-                                 help='do not save intermediate training results to [opt.checkpoints]/name/web/')
+        self.parser.add_argument('--no_html', action='store_true', help='do not save intermediate training results to [opt.checkpoints]/name/web/')
+        #self.parser.add_argument('--no_html', action='store_true', default=False,
+        #                         help='do not save intermediate training results to [opt.checkpoints]/name/web/')
         self.parser.add_argument('--print-freq', type=int, default=10, help='frequency of showing training results on console')
         # training schedule
         self.parser.add_argument('--lambda-recon', type=float, default=1.0, help='loss weight of loss_r')
@@ -69,7 +69,7 @@ class Options():
         self.parser.add_argument('--smooth-label', action='store_true', help='smooth label or not for GANloss')
 
         # Use Spectral Normalization
-        self.parser.add_argument('--sn', action='store_true', default=True, required=False)
+        self.parser.add_argument('--sn', action='store_true', default=False, required=False)
 
         self.opt = self.parser.parse_args()
         self.show_opt()
