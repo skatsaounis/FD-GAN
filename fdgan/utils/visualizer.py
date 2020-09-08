@@ -2,9 +2,9 @@ import numpy as np
 import os
 import ntpath
 import time
+from PIL import Image
 from . import util
 from . import html
-from scipy.misc import imresize
 
 
 class Visualizer():
@@ -143,9 +143,9 @@ class Visualizer():
             save_path = os.path.join(image_dir, image_name)
             h, w, _ = im.shape
             if aspect_ratio > 1.0:
-                im = imresize(im, (h, int(w * aspect_ratio)), interp='bicubic')
+                im = np.array(Image.fromarray(im).resize((h, int(w * aspect_ratio))))
             if aspect_ratio < 1.0:
-                im = imresize(im, (int(h / aspect_ratio), w), interp='bicubic')
+                im = np.array(Image.fromarray(im).resize((int(h / aspect_ratio), w)))
             util.save_image(im, save_path)
 
             ims.append(image_name)
