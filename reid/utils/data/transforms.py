@@ -87,6 +87,8 @@ class RandomSizedEarser(object):
                     return img
 
 
+# code from
+# https://github.com/LuckyDC/SFT_REID/blob/master/utils/augmentor.py#L260
 class RandomColorJitter:
     """Randomly change the brightness, contrast and saturation of an image.
     Args:

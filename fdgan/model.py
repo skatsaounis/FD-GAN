@@ -12,11 +12,12 @@ from torch.nn import functional as F
 
 import fdgan.utils.util as util
 from fdgan.networks import get_norm_layer, init_weights, CustomPoseGenerator, NLayerDiscriminator, \
-                            remove_module_key, set_bn_fix, get_scheduler, print_network
+                            remove_module_key, set_bn_fix, get_scheduler, print_network, SNDiscriminator
 from fdgan.losses import GANLoss
 from reid.models import create
 from reid.models.embedding import EltwiseSubEmbed
 from reid.models.multi_branch import SiameseNet
+
 
 class FDGANModel(object):
 
@@ -24,6 +25,7 @@ class FDGANModel(object):
         self.opt = opt
         self.save_dir = os.path.join(opt.checkpoints, opt.name)
         self.norm_layer = get_norm_layer(norm_type=opt.norm)
+        self.sn = opt.sn
 
         self._init_models()
         self._init_losses()
@@ -46,11 +48,17 @@ class FDGANModel(object):
         di_base_model = create(self.opt.arch, cut_at_pooling=True)
         di_embed_model = EltwiseSubEmbed(use_batch_norm=True, use_classifier=True, num_features=2048, num_classes=1)
         self.net_Di = SiameseNet(di_base_model, di_embed_model)
-        self.net_Dp = NLayerDiscriminator(3+18, norm_layer=self.norm_layer)
 
-        if self.opt.stage==1:
+        # Whether to use default discriminator or Spectral Normalization one
+        if self.sn:
+            self.net_Dp = SNDiscriminator(3 + 18, leak=0.1)
+        else:
+            self.net_Dp = NLayerDiscriminator(3 + 18, norm_layer=self.norm_layer)
+
+        if self.opt.stage == 1:
             init_weights(self.net_G)
-            init_weights(self.net_Dp)
+            if not self.sn:
+                init_weights(self.net_Dp)
             state_dict = remove_module_key(torch.load(self.opt.netE_pretrain))
             self.net_E.load_state_dict(state_dict)
             state_dict['embed_model.classifier.weight'] = state_dict['embed_model.classifier.weight'][1].view(1, -1)

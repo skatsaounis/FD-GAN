@@ -10,6 +10,8 @@ from torch.nn import init
 from torch.optim import lr_scheduler
 import torchvision
 
+from fdgan.spectral_normalization import SpectralNorm
+
 def weights_init_normal(m):
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
@@ -17,7 +19,7 @@ def weights_init_normal(m):
     elif classname.find('Linear') != -1:
         init.normal_(m.weight.data, 0.0, 0.02)
     elif classname.find('BatchNorm2d') != -1:
-        init.normal(m.weight.data, 1.0, 0.02)
+        init.normal_(m.weight.data, 1.0, 0.02)
         init.constant_(m.bias.data, 0.0)
 
 def init_weights(net):
@@ -191,6 +193,7 @@ class CustomPoseGenerator(nn.Module):
         fake_imgs = fake_feature_1
         return fake_imgs
 
+
 class NLayerDiscriminator(nn.Module):
     def __init__(self, input_nc, norm_layer=nn.BatchNorm2d):
         super(NLayerDiscriminator, self).__init__()
@@ -235,3 +238,37 @@ class NLayerDiscriminator(nn.Module):
 
     def forward(self, input):
         return self.model(input)
+
+
+# SN-GAN Discriminator code
+# https://github.com/christiancosgrove/pytorch-spectral-normalization-gan/blob/master/model.py
+
+class SNDiscriminator(nn.Module):
+    def __init__(self, input_nc, leak=0.1, w_g=4):
+        super(SNDiscriminator, self).__init__()
+
+        self.leak = leak
+        self.w_g = w_g
+
+        self.conv1 = SpectralNorm(nn.Conv2d(input_nc, 64, 3, stride=1, padding=(1, 1)))
+
+        self.conv2 = SpectralNorm(nn.Conv2d(64, 64, 4, stride=2, padding=(1, 1)))
+        self.conv3 = SpectralNorm(nn.Conv2d(64, 128, 3, stride=1, padding=(1, 1)))
+        self.conv4 = SpectralNorm(nn.Conv2d(128, 128, 4, stride=2, padding=(1, 1)))
+        self.conv5 = SpectralNorm(nn.Conv2d(128, 256, 3, stride=1, padding=(1, 1)))
+        self.conv6 = SpectralNorm(nn.Conv2d(256, 256, 4, stride=2, padding=(1, 1)))
+        self.conv7 = SpectralNorm(nn.Conv2d(256, 512, 3, stride=1, padding=(1, 1)))
+
+        self.fc = SpectralNorm(nn.Linear(self.w_g * self.w_g * 512, 1))
+
+    def forward(self, x):
+        m = x
+        m = nn.LeakyReLU(self.leak)(self.conv1(m))
+        m = nn.LeakyReLU(self.leak)(self.conv2(m))
+        m = nn.LeakyReLU(self.leak)(self.conv3(m))
+        m = nn.LeakyReLU(self.leak)(self.conv4(m))
+        m = nn.LeakyReLU(self.leak)(self.conv5(m))
+        m = nn.LeakyReLU(self.leak)(self.conv6(m))
+        m = nn.LeakyReLU(self.leak)(self.conv7(m))
+
+        return self.fc(m.view(-1, self.w_g * self.w_g * 512))
