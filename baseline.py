@@ -194,8 +194,8 @@ if __name__ == '__main__':
     # data
     parser.add_argument('-d', '--dataset', type=str, default='market1501',
                         choices=datasets.names())
-    parser.add_argument('-b', '--batch-size', type=int, default=36)
-    parser.add_argument('-j', '--workers', type=int, default=10)
+    parser.add_argument('-b', '--batch-size', type=int, default=256)
+    parser.add_argument('-j', '--workers', type=int, default=4)
     parser.add_argument('--split', type=int, default=0)
     parser.add_argument('--height', type=int,
                         help="input height, default: 256 for resnet")
