@@ -1,3 +1,6 @@
+# code
+# https://github.com/KaiyangZhou/deep-person-reid/blob/master/torchreid/models/hacnn.py
+
 from __future__ import division, absolute_import
 import torch
 from torch import nn

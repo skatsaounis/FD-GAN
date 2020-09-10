@@ -34,7 +34,7 @@ def _pluck(identities, indices, relabel=False):
 class Dataset(object):
     def __init__(self, root, split_id=0):
         self.root = root
-        self.root = '/users/pa19/gealexdl/team7/FD-GAN/datasets/market1501'
+        #self.root = '/users/pa19/gealexdl/team7/FD-GAN/datasets/market1501'
         self.split_id = split_id
         self.meta = None
         self.split = None

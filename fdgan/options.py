@@ -16,18 +16,10 @@ class Options():
         self.parser.add_argument('--dataroot', type=str, default='./datasets/', help='root path to datasets (should have subfolders market1501, dukemtmc, cuhk03, etc)')
         self.parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='root path to save models')
         self.parser.add_argument('--name', type=str, default='FD-GAN', help='directory to save models')
-
-        # uncomment these
-        #self.parser.add_argument('--netE-pretrain', type=str, default='pretrained model path for net_E in stage 2')
-        #self.parser.add_argument('--netG-pretrain', type=str, default='pretrained model path for net_G in stage 2')
-        #self.parser.add_argument('--netDp-pretrain', type=str, default='pretrained model path for net_Dp in stage 2')
-        #self.parser.add_argument('--netDi-pretrain', type=str, default='pretrained model path for net_Di in stage 2')
-
-        # zog, comment these
-        self.parser.add_argument('--netE-pretrain', type=str, default='C:/Users/zogdi/Desktop/FD-GAN/checkpoints/100_net_E.pth')
-        self.parser.add_argument('--netG-pretrain', type=str, default='C:/Users/zogdi/Desktop/FD-GAN/checkpoints/100_net_G.pth')
-        self.parser.add_argument('--netDp-pretrain', type=str, default='C:/Users/zogdi/Desktop/FD-GAN/checkpoints/100_net_Dp.pth')
-        self.parser.add_argument('--netDi-pretrain', type=str, default='C:/Users/zogdi/Desktop/FD-GAN/checkpoints/100_net_Di.pth')
+        self.parser.add_argument('--netE-pretrain', type=str, default='pretrained model path for net_E in stage 2')
+        self.parser.add_argument('--netG-pretrain', type=str, default='pretrained model path for net_G in stage 2')
+        self.parser.add_argument('--netDp-pretrain', type=str, default='pretrained model path for net_Dp in stage 2')
+        self.parser.add_argument('--netDi-pretrain', type=str, default='pretrained model path for net_Di in stage 2')
 
         # model structures
         self.parser.add_argument('--arch', type=str, default='resnet50', choices=models.names())
@@ -51,16 +43,12 @@ class Options():
         self.parser.add_argument('--eval-step', type=int, default=10, help='frequency of evaluate checkpoints at the end of epochs')
         # visualization setting
         self.parser.add_argument('--display-port', type=int, default=6006, help='visdom port of the web display')
-        #self.parser.add_argument('--display-port', type=int, default=0, help='visdom port of the web display')
-        #self.parser.add_argument('--display-id', type=int, default=1, help='window id of the web display, set 0 for non-usage of visdom')
         self.parser.add_argument('--display-id', type=int, default=0, help='window id of the web display, set 0 for non-usage of visdom')
         self.parser.add_argument('--display-winsize', type=int, default=256,  help='display window size')
         self.parser.add_argument('--display-freq', type=int, default=10, help='frequency of showing training results on screen')
         self.parser.add_argument('--display-single-pane-ncols', type=int, default=0, help='if positive, display all images in a single visdom web panel with certain number of images per row.')
         self.parser.add_argument('--update-html-freq', type=int, default=100, help='frequency of saving training results to html')
         self.parser.add_argument('--no_html', action='store_true', help='do not save intermediate training results to [opt.checkpoints]/name/web/')
-        #self.parser.add_argument('--no_html', action='store_true', default=False,
-        #                         help='do not save intermediate training results to [opt.checkpoints]/name/web/')
         self.parser.add_argument('--print-freq', type=int, default=10, help='frequency of showing training results on console')
         # training schedule
         self.parser.add_argument('--lambda-recon', type=float, default=1.0, help='loss weight of loss_r')
