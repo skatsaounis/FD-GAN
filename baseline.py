@@ -18,6 +18,7 @@ from reid.utils.data import transforms as T
 from reid.utils.data.preprocessor import Preprocessor
 from reid.utils.logging import Logger
 from reid.utils.serialization import load_checkpoint, save_checkpoint, copy_state_dict
+from reid.loss import TripletLoss
 
 from reid.utils.data.sampler import RandomPairSampler
 from reid.models.embedding import EltwiseSubEmbed
@@ -26,7 +27,7 @@ from reid.evaluators import CascadeEvaluator
 from reid.trainers import SiameseTrainer
 
 def get_data(name, split_id, data_dir, height, width, batch_size, workers,
-             combine_trainval, np_ratio):
+             combine_trainval, np_ratio, augmented=False):
     root = osp.join(data_dir, name)
 
     dataset = datasets.create(name, root, split_id=split_id)
@@ -36,13 +37,23 @@ def get_data(name, split_id, data_dir, height, width, batch_size, workers,
 
     train_set = dataset.trainval if combine_trainval else dataset.train
 
-    train_transformer = T.Compose([
-        T.RandomSizedRectCrop(height, width),
-        T.RandomSizedEarser(),
-        T.RandomHorizontalFlip(),
-        T.ToTensor(),
-        normalizer,
-    ])
+    if augmented:
+        train_transformer = T.Compose([
+            T.RandomSizedRectCrop(height, width),
+            T.RandomColorJitter(),
+            T.RandomSizedEarser(),
+            T.RandomHorizontalFlip(),
+            T.ToTensor(),
+            normalizer,
+        ])
+    else:
+        train_transformer = T.Compose([
+            T.RandomSizedRectCrop(height, width),
+            T.RandomSizedEarser(),
+            T.RandomHorizontalFlip(),
+            T.ToTensor(),
+            normalizer,
+        ])
 
     test_transformer = T.Compose([
         T.RectScale(height, width),
@@ -82,26 +93,40 @@ def main(args):
     else:
         log_dir = osp.dirname(args.resume)
         sys.stdout = Logger(osp.join(log_dir, 'log_test.txt'))
-    # print("==========\nArgs:{}\n==========".format(args))
 
-    # Create data loaders
+    print("==========\nArgs:{}\n==========".format(args))
+
+    # Create data loaders with specific size of photos
     if args.height is None or args.width is None:
-        args.height, args.width = (256, 128)
+        args.height, args.width = (144, 56) if args.arch in \
+                                               ['inception', 'inceptionNet', 'squeezenet', 'squeezenet1_0', 'squeezenet1_1'] else \
+            (384, 128) if args.arch == 'mgn' else (160, 64) if args.arch == 'hacnn' else\
+                (256, 128)
+
     dataset, train_loader, val_loader, test_loader = \
         get_data(args.dataset, args.split, args.data_dir, args.height,
                  args.width, args.batch_size, args.workers,
                  args.combine_trainval, args.np_ratio)
 
     # Create model
+    args.features = 1024 if args.arch in \
+                            ['squeezenet', 'squeezenet1_0', 'squeezenet1_1'] else \
+        1536 if args.arch in ['mgn', 'inception', 'inceptionv4'] else \
+        2432 if args.arch == 'hacnn' else \
+            2048
+
     base_model = models.create(args.arch, cut_at_pooling=True)
-    embed_model = EltwiseSubEmbed(use_batch_norm=True, use_classifier=True,
-                                      num_features=2048, num_classes=2)
+    embed_model = EltwiseSubEmbed(use_batch_norm=True, use_classifier=True, num_features=args.features, num_classes=2,
+                                  use_sft=args.spectral)
     model = SiameseNet(base_model, embed_model)
-    model = nn.DataParallel(model).cuda()
+    model = nn.DataParallel(model).cuda() # gpu #
+
+    print(model)
+    print('No of parameters:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
     # Evaluator
     evaluator = CascadeEvaluator(
-        torch.nn.DataParallel(base_model).cuda(),
+        torch.nn.DataParallel(base_model).cuda(), # gpu #
         embed_model,
         embed_dist_fn=lambda x: F.softmax(Variable(x), dim=1).data[:, 0])
 
@@ -121,7 +146,11 @@ def main(args):
         return
 
     # Criterion
-    criterion = nn.CrossEntropyLoss().cuda()
+    if args.criterion == 'cross':
+        criterion = nn.CrossEntropyLoss().cuda()
+    elif args.criterion == 'triplet':
+        criterion = TripletLoss(args.margin).cuda()
+
     # Optimizer
     param_groups = [
         {'params': model.module.base_model.parameters(), 'lr_mult': 1.0},
@@ -178,6 +207,7 @@ if __name__ == '__main__':
     # model
     parser.add_argument('-a', '--arch', type=str, default='resnet50',
                         choices=models.names())
+    parser.add_argument('--features', type=int, default=2048, help="no of features, default: 2048 for resnet*")
     # optimizer
     parser.add_argument('--lr', type=float, default=0.01, help="learning rate")
     parser.add_argument('--np-ratio', type=int, default=3)
@@ -197,4 +227,12 @@ if __name__ == '__main__':
                         default=osp.join(working_dir, 'datasets'))
     parser.add_argument('--logs-dir', type=str, metavar='PATH',
                         default=osp.join(working_dir, 'checkpoints'))
+
+    parser.add_argument('-aug', '--augmented', action='store_true', default=False, required=False)
+    parser.add_argument('-sft', '--spectral', action='store_true', default=False, required=False)
+
+    parser.add_argument('--margin', type=float, default=0.5,
+                        help="margin of the triplet loss, default: 0.5")
+    parser.add_argument('--criterion', type=str, default='cross',
+                        choices=['cross', 'triplet'])
     main(parser.parse_args())

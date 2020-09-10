@@ -18,6 +18,7 @@ from fdgan.options import Options
 from fdgan.utils.visualizer import Visualizer
 from fdgan.model import FDGANModel
 
+
 def get_data(name, data_dir, height, width, batch_size, workers, pose_aug):
     root = osp.join(data_dir, name)
     dataset = datasets.create(name, root)
@@ -41,13 +42,23 @@ def get_data(name, data_dir, height, width, batch_size, workers, pose_aug):
         batch_size=batch_size, num_workers=workers,
         shuffle=False, pin_memory=False)
 
-    return dataset, train_loader, test_loader
+    val_loader = DataLoader(
+        Preprocessor(dataset.val,
+                     root=dataset.images_dir, transform=test_transformer),
+        batch_size=batch_size, num_workers=workers,
+        shuffle=False, pin_memory=False)
+
+    return dataset, train_loader, test_loader, val_loader
+
+
 
 def main():
     opt = Options().parse()
-    dataset, train_loader, test_loader = get_data(opt.dataset, opt.dataroot, opt.height, opt.width, opt.batch_size, opt.workers, opt.pose_aug)
+    dataset, train_loader, test_loader, val_loader = get_data(
+        opt.dataset, opt.dataroot, opt.height, opt.width, opt.batch_size,
+        opt.workers, opt.pose_aug)
 
-    dataset_size = len(dataset.trainval)*4
+    dataset_size = len(dataset.trainval) * 4
     print('#training images = %d' % dataset_size)
 
     model = FDGANModel(opt)

@@ -6,6 +6,7 @@ from torch.autograd import Variable
 
 from .evaluation_metrics import accuracy
 from .utils.meters import AverageMeter
+from .loss import TripletLoss
 
 
 class BaseTrainer(object):
@@ -31,7 +32,7 @@ class BaseTrainer(object):
             inputs, targets = self._parse_data(inputs)
             loss, prec1 = self._forward(inputs, targets)
 
-            losses.update(loss.data[0], targets.size(0))
+            losses.update(loss.item(), targets.size(0))
             precisions.update(prec1, targets.size(0))
 
             optimizer.zero_grad()
@@ -63,11 +64,17 @@ class SiameseTrainer(BaseTrainer):
     def _parse_data(self, inputs):
         (imgs1, _, pids1, _), (imgs2, _, pids2, _) = inputs
         inputs = [Variable(imgs1), Variable(imgs2)]
-        targets = Variable((pids1 == pids2).long().cuda())
+        targets = Variable((pids1 == pids2).long().cuda()) # gpu #
         return inputs, targets
 
     def _forward(self, inputs, targets):
         _, _, outputs = self.model(*inputs)
-        loss = self.criterion(outputs, targets)
-        prec1, = accuracy(outputs.data, targets.data)
-        return loss, prec1[0]
+        if isinstance(self.criterion, torch.nn.CrossEntropyLoss):
+            loss = self.criterion(outputs, targets)
+            prec1, = accuracy(outputs.data, targets.data)
+            return loss, prec1[0]
+        elif isinstance(self.criterion, TripletLoss):
+            loss, prec = self.criterion(outputs, targets)
+            return loss, prec
+        else:
+            raise ValueError("Unsupported loss:", self.criterion)

@@ -5,6 +5,7 @@ import numpy as np
 
 from ..serialization import read_json
 
+
 def _pluck(identities, indices, relabel=False):
     ret = []
     query = {}
@@ -29,9 +30,11 @@ def _pluck(identities, indices, relabel=False):
                     query[pid].append(fname)
     return ret, query
 
+
 class Dataset(object):
     def __init__(self, root, split_id=0):
         self.root = root
+        #self.root = '/users/pa19/gealexdl/team7/FD-GAN/datasets/market1501'
         self.split_id = split_id
         self.meta = None
         self.split = None

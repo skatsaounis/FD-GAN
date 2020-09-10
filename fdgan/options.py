@@ -5,6 +5,7 @@ import fdgan.utils.util as util
 from reid import models
 from reid import datasets
 
+
 class Options():
     def __init__(self):
         self.parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -19,6 +20,7 @@ class Options():
         self.parser.add_argument('--netG-pretrain', type=str, default='pretrained model path for net_G in stage 2')
         self.parser.add_argument('--netDp-pretrain', type=str, default='pretrained model path for net_Dp in stage 2')
         self.parser.add_argument('--netDi-pretrain', type=str, default='pretrained model path for net_Di in stage 2')
+
         # model structures
         self.parser.add_argument('--arch', type=str, default='resnet50', choices=models.names())
         self.parser.add_argument('--norm', type=str, default='batch', help='instance normalization or batch normalization')
@@ -41,7 +43,7 @@ class Options():
         self.parser.add_argument('--eval-step', type=int, default=10, help='frequency of evaluate checkpoints at the end of epochs')
         # visualization setting
         self.parser.add_argument('--display-port', type=int, default=6006, help='visdom port of the web display')
-        self.parser.add_argument('--display-id', type=int, default=1, help='window id of the web display, set 0 for non-usage of visdom')
+        self.parser.add_argument('--display-id', type=int, default=0, help='window id of the web display, set 0 for non-usage of visdom')
         self.parser.add_argument('--display-winsize', type=int, default=256,  help='display window size')
         self.parser.add_argument('--display-freq', type=int, default=10, help='frequency of showing training results on screen')
         self.parser.add_argument('--display-single-pane-ncols', type=int, default=0, help='if positive, display all images in a single visdom web panel with certain number of images per row.')
@@ -53,6 +55,9 @@ class Options():
         self.parser.add_argument('--lambda-veri', type=float, default=1.0, help='loss weight of loss_v')
         self.parser.add_argument('--lambda-sp', type=float, default=1.0, help='loss weight of loss_sp')
         self.parser.add_argument('--smooth-label', action='store_true', help='smooth label or not for GANloss')
+
+        # Use Spectral Normalization
+        self.parser.add_argument('--sn', action='store_true', default=False, required=False)
 
         self.opt = self.parser.parse_args()
         self.show_opt()

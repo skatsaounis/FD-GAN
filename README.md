@@ -128,3 +128,34 @@ Please cite our paper if you find the code useful for your research.
 
 ## Acknowledgements
 Our code is inspired by [pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) and [open-reid](https://github.com/Cysu/open-reid).
+
+---
+
+## Encoders for testing:
+```
+srun python3 /users/pa19/gealexdl/team7/FD-GAN/baseline.py \
+    -b 256 -d market1501 -a squeezenet1_1 --evaluate --resume \
+    --eval-step 2 --epochs 20 \
+    /users/pa19/gealexdl/team7/FD-GAN/datasets/stg1-market/model_best_squeezenet1_1.pth.tar
+```
+```
+srun python3 /users/pa19/gealexdl/team7/FD-GAN/baseline.py \
+    -b 128 -d market1501 -a inception --evaluate --resume \
+    --eval-step 2 --epochs 20 \
+    /users/pa19/gealexdl/team7/FD-GAN/datasets/stg1-market/model_best_inception.pth.tar
+```
+```
+srun python3 /users/pa19/gealexdl/team7/FD-GAN/baseline.py \
+    -b 128 -d market1501 -a inceptionv4 --evaluate --resume \
+    --eval-step 2 --epochs 20 \
+    /users/pa19/gealexdl/team7/FD-GAN/datasets/stg1-market/model_best_inceptionv4.pth.tar
+```
+```
+srun python3 /users/pa19/gealexdl/team7/FD-GAN/baseline.py \
+    -b 128 -d market1501 -a mgn --evaluate --resume \
+    --eval-step 2 --epochs 20 \
+    /users/pa19/gealexdl/team7/FD-GAN/datasets/stg1-market/model_best_mgn.pth.tar
+```
+
+## Augment Data (random Brightness/Contrast/Saturation)
+pass  ```-aug```
